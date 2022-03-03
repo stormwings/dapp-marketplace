@@ -69,10 +69,6 @@ class App extends Component {
 
   createProduct(name, price) {
     this.setState({ loading: true })
-
-    console.log(name)
-    console.log(price)
-    console.log(this.state.account)
     
     this.state.marketplace.methods
       .createProduct(name, price)
