@@ -2,7 +2,9 @@ import React, { Component } from 'react';
 import Web3 from 'web3'
 import './App.css';
 import Marketplace from '../abis/Marketplace.json'
+
 import Navbar from './Navbar'
+import Main from './Main'
 
 class App extends Component {
 
@@ -29,14 +31,55 @@ class App extends Component {
     // Load account
     const accounts = await web3.eth.getAccounts()
     this.setState({ account: accounts[0] })
+
+    // Load network data
     const networkId = await web3.eth.net.getId()
     const networkData = Marketplace.networks[networkId]
-    if(networkData) {
+
+    console.log(networkData)
+
+    if (networkData) {
       const marketplace = web3.eth.Contract(Marketplace.abi, networkData.address)
-      console.log(marketplace)
+      const productCount = await marketplace.methods.productCount().call()
+      
+      this.setState({ marketplace })
+      this.setState({ productCount })
+
+      // Load products
+      for (var i = 1; i <= productCount; i++) {
+        const product = await marketplace.methods.products(i).call()
+        this.setState({
+          products: [...this.state.products, product]
+        })
+      }
+
+      this.setState({ loading: false })
     } else {
       window.alert('Marketplace contract not deployed to detected network.')
     }
+  }
+
+  purchaseProduct(id, price) {
+    this.setState({ loading: true })
+    this.state.marketplace.methods.purchaseProduct(id).send({ from: this.state.account, value: price })
+    .once('receipt', (receipt) => {
+      this.setState({ loading: false })
+    })
+  }
+
+  createProduct(name, price) {
+    this.setState({ loading: true })
+
+    console.log(name)
+    console.log(price)
+    console.log(this.state.account)
+    
+    this.state.marketplace.methods
+      .createProduct(name, price)
+      .send({ from: this.state.account })
+      .once('receipt', (receipt) => {
+        this.setState({ loading: false })
+      })
   }
 
   constructor(props) {
@@ -47,24 +90,26 @@ class App extends Component {
       products: [],
       loading: true
     }
+
+    this.createProduct = this.createProduct.bind(this)
+    this.purchaseProduct = this.purchaseProduct.bind(this)
   }
 
   render() {
     return (
       <div>
         <Navbar account={this.state.account} />
-        <div className="container-fluid mt-5">
-          <div className="row">
-            <main role="main" className="col-lg-12 d-flex text-center">
-              <div className="content mr-auto ml-auto">
-                <h1>Blockchain Marketplace</h1>
-                <p>
-                  This is a Blockchain marketplace
-                </p>
-              </div>
-            </main>
-          </div>
-        </div>
+        <main role="main" className="col-lg-12 d-flex">
+          {/* fix loading */}
+          {/* { this.state.loading
+            ? <div id="loader" className="text-center"><p className="text-center">Loading...</p></div>
+            :  */}
+          <Main
+            products={this.state.products}
+            createProduct={this.createProduct}
+            purchaseProduct={this.purchaseProduct}
+          />
+        </main>
       </div>
     );
   }
