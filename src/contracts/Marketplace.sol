@@ -1,24 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.5.16;
 
-import "./Product.sol";
-
-event ProductCreated(
-    uint id,
-    string name,
-    uint price,
-    address owner,
-    bool purchased
-);
-
-struct Product {
-    uint id;
-    string name;
-    uint price;
-    address owner;
-    bool purchased;
-}
-
 contract Marketplace {
     string public name;
     uint public productCount = 0;
@@ -27,6 +9,22 @@ contract Marketplace {
 
     constructor() public {
         name = "Dapp University Marketplace";
+    }
+    
+    event ProductCreated(
+        uint id,
+        string name,
+        uint price,
+        address owner,
+        bool purchased
+    );
+
+    struct Product {
+        uint id;
+        string name;
+        uint price;
+        address owner;
+        bool purchased;
     }
 
     function createProduct(string memory _name, uint _price) public {
