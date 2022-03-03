@@ -8,7 +8,7 @@ contract Marketplace {
     mapping(uint => Product) public products;
 
     constructor() public {
-        name = "Dapp University Marketplace";
+        name = "Dapp Marketplace";
     }
     
     event ProductCreated(
