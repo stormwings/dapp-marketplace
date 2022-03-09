@@ -2,6 +2,7 @@ import React from 'react';
 import Web3 from 'web3'
 import './App.css';
 import Marketplace from './abis/Marketplace.json'
+import SocialNetwork from './abis/SocialNetwork.json'
 
 import Navbar from './components/Navbar'
 import Main from './components/Main'
@@ -11,6 +12,9 @@ const App = () => {
   const [account, setAccount] = React.useState('')
   const [productCount, setProductCount] = React.useState(0)
   const [products, setProducts] = React.useState([])
+  const [socialNetwork, setSocialNetwork] = React.useState(null)
+  const [posts, setPosts] = React.useState([])
+  const [postCount, setPostCount] = React.useState(0)
   const [marketplace, setMarketplace] = React.useState(null)
   const [loading, setLoading] = React.useState(true)
   const [metamaskInstalled, setMetamaskInstalled] = React.useState(null)
@@ -49,7 +53,7 @@ const App = () => {
 
     // Load network data
     const networkId = await web3.eth.net.getId()
-    const networkData = Marketplace.networks[networkId]
+    const networkData = Marketplace.networks[networkId] // verify with more networks (probably fixes "write something")
 
     if (networkData) {
       const marketplace = web3.eth.Contract(Marketplace.abi, networkData.address)
@@ -64,6 +68,21 @@ const App = () => {
         const product = await marketplace.methods.products(i).call()
         setProducts([...products, product])
       }
+      
+      const socialNetwork = web3.eth.Contract(SocialNetwork.abi, networkData.address)
+      setSocialNetwork(socialNetwork)
+
+      const postCount = await socialNetwork.methods.postCount().call()
+      setPostCount(postCount)
+
+      // Load posts
+      for (let j = 1; j <= postCount; j++) {
+        const post = await socialNetwork.methods.posts(j).call()
+        setPosts([...posts, post])
+      }
+
+      // Sort posts. Show highest tipped posts first
+      setPosts(posts.sort((a,b) => b.tipAmount - a.tipAmount))
 
       setLoading(false)
     } else {
@@ -91,27 +110,45 @@ const App = () => {
       })
   }
 
-  // tipPost(id, tipAmount) {
-  //   console.log("tipping post", id, tipAmount)
-  //   setLoading(true)
-  //   this.state.socialNetwork.methods
-  //     .tipPost(id)
-  //     .send({ from: this.state.account, value: tipAmount })
-  //     .once('receipt', (receipt) => {
-  //     setLoading(false)
-  //   })
-  // }
+  const createPost = (content) => {
+    setLoading(true)
+
+    socialNetwork.methods
+      .createPost(content)
+      .send({ from: account })
+      .once('receipt', (receipt) => {
+        console.log({ receipt })
+        setLoading(false)
+      })
+  }
+
+  const tipPost = (id, tipAmount) => {
+    console.log("tipping post", id, tipAmount)
+    setLoading(true)
+    socialNetwork.methods
+      .tipPost(id)
+      .send({ from: account, value: tipAmount })
+        .once('receipt', (receipt) => {
+        setLoading(false)
+      })
+  }
   
   return (
     <div>
       <Navbar account={account} />
       {
-        !loading && 
-        <main role="main" className="col-lg-12 d-flex">
+        loading && 
+        <main role="main" className="col-lg-12 d-flex" 
+          style={{ justifyContent: "center", marginTop: "100px" }}
+        >
             { metamaskInstalled ? <Main
             products={products}
             productCount={productCount}
+            posts={posts}
+            postCount={postCount}
+            createPost={createPost}
             createProduct={createProduct}
+            tipPost={tipPost}
             purchaseProduct={purchaseProduct}
           /> : <MetamaskAlert />}
         </main>
