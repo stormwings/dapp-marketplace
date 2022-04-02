@@ -10,11 +10,11 @@ import MetamaskAlert from './components/MetamaskAlert';
 
 const App = () => {
   const [account, setAccount] = React.useState('')
-  const [productCount, setProductCount] = React.useState(0)
+  // const [productCount, setProductCount] = React.useState(0)
   const [products, setProducts] = React.useState([])
-  const [socialNetwork, setSocialNetwork] = React.useState(null)
+  // const [socialNetwork, setSocialNetwork] = React.useState(null)
   const [posts, setPosts] = React.useState([])
-  const [postCount, setPostCount] = React.useState(0)
+  // const [postCount, setPostCount] = React.useState(0)
   const [marketplace, setMarketplace] = React.useState(null)
   const [loading, setLoading] = React.useState(true)
   const [metamaskInstalled, setMetamaskInstalled] = React.useState(null)
@@ -61,7 +61,7 @@ const App = () => {
 
       
       const productCount = await marketplace.methods.productCount().call()
-      setProductCount(productCount)
+      // setProductCount(productCount)
   
       // Load products
       for (var i = 1; i <= productCount; i++) {
@@ -70,10 +70,10 @@ const App = () => {
       }
       
       const socialNetwork = web3.eth.Contract(SocialNetwork.abi, networkData.address)
-      setSocialNetwork(socialNetwork)
+      // setSocialNetwork(socialNetwork)
 
       const postCount = await socialNetwork.methods.postCount().call()
-      setPostCount(postCount)
+      // setPostCount(postCount)
 
       // Load posts
       for (let j = 1; j <= postCount; j++) {
@@ -110,28 +110,28 @@ const App = () => {
       })
   }
 
-  const createPost = (content) => {
-    setLoading(true)
+  // const createPost = (content) => {
+  //   setLoading(true)
 
-    socialNetwork.methods
-      .createPost(content)
-      .send({ from: account })
-      .once('receipt', (receipt) => {
-        console.log({ receipt })
-        setLoading(false)
-      })
-  }
+  //   socialNetwork.methods
+  //     .createPost(content)
+  //     .send({ from: account })
+  //     .once('receipt', (receipt) => {
+  //       console.log({ receipt })
+  //       setLoading(false)
+  //     })
+  // }
 
-  const tipPost = (id, tipAmount) => {
-    console.log("tipping post", id, tipAmount)
-    setLoading(true)
-    socialNetwork.methods
-      .tipPost(id)
-      .send({ from: account, value: tipAmount })
-        .once('receipt', (receipt) => {
-        setLoading(false)
-      })
-  }
+  // const tipPost = (id, tipAmount) => {
+  //   console.log("tipping post", id, tipAmount)
+  //   setLoading(true)
+  //   socialNetwork.methods
+  //     .tipPost(id)
+  //     .send({ from: account, value: tipAmount })
+  //       .once('receipt', (receipt) => {
+  //       setLoading(false)
+  //     })
+  // }
   
   return (
     <div>
@@ -143,12 +143,12 @@ const App = () => {
         >
             { metamaskInstalled ? <Main
             products={products}
-            productCount={productCount}
-            posts={posts}
-            postCount={postCount}
-            createPost={createPost}
+            // productCount={productCount}
+            // posts={posts}
+            // postCount={postCount}
+            // createPost={createPost}
             createProduct={createProduct}
-            tipPost={tipPost}
+            // tipPost={tipPost}
             purchaseProduct={purchaseProduct}
           /> : <MetamaskAlert />}
         </main>
